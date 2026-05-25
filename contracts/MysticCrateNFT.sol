@@ -97,11 +97,8 @@ contract MysticCrateNFT is ERC721URIStorage, Ownable {
         }
         lastCheckInDay[msg.sender] = day;
 
-        uint256 xpAwarded = _randomInRange(
-            10,
-            30,
-            uint256(keccak256(abi.encodePacked(block.prevrandao, msg.sender, day, "checkin")))
-        );
+        uint256 streakDay = checkInStreak[msg.sender];
+        uint256 xpAwarded = _checkInXp(streakDay);
         _awardXp(msg.sender, xpAwarded);
 
         emit DailyCheckIn(msg.sender, checkInStreak[msg.sender], xpAwarded);
@@ -158,6 +155,31 @@ contract MysticCrateNFT is ERC721URIStorage, Ownable {
         returns (address[10] memory users, uint256[10] memory scores)
     {
         return (_leaderboardUsers, _leaderboardXp);
+    }
+
+    function checkInXpForDay(uint256 day) external pure returns (uint256) {
+        return _checkInXp(day);
+    }
+
+    function _checkInXp(uint256 day) private pure returns (uint256) {
+        require(day >= 1 && day <= 7, "Invalid day");
+        if (day == 1) return 5;
+        if (day == 2) return 7;
+        if (day == 3) return 10;
+        if (day == 4) return 12;
+        if (day == 5) return 15;
+        if (day == 6) return 20;
+        return 30;
+    }
+
+    function getNextCheckInDay(address user) external view returns (uint256) {
+        uint256 day = _today();
+        if (lastCheckInDay[user] >= day) return checkInStreak[user];
+        if (lastCheckInDay[user] == day - 1) {
+            uint256 next = checkInStreak[user] + 1;
+            return next > 7 ? 1 : next;
+        }
+        return 1;
     }
 
     function _syncMintDay(address user) private {

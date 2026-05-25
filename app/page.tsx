@@ -12,8 +12,10 @@ import { base } from 'wagmi/chains';
 import { decodeEventLog, parseEther } from 'viem';
 import Image from 'next/image';
 import { ConnectWallet } from '@/components/ConnectWallet';
-import { PhoneOverlay } from '@/components/PhoneOverlay';
-import { DailyPanel } from '@/components/DailyPanel';
+import { QuickNav, type AppScreen } from '@/components/QuickNav';
+import { CheckInPanel } from '@/components/CheckInPanel';
+import { SpinWheelPanel } from '@/components/SpinWheelPanel';
+import { InventoryPanel } from '@/components/InventoryPanel';
 import { LeaderboardPanel } from '@/components/LeaderboardPanel';
 import {
   mysticCrateAbi,
@@ -43,6 +45,7 @@ export default function Home() {
     useWaitForTransactionReceipt({ hash });
   const { totalXp, mintsRemaining, refetch: refetchStats } = usePlayerStats();
 
+  const [screen, setScreen] = useState<AppScreen>('crate');
   const [isOpening, setIsOpening] = useState(false);
   const [revealedNFT, setRevealedNFT] = useState<string | null>(null);
   const [rarity, setRarity] = useState('');
@@ -51,8 +54,6 @@ export default function Home() {
   const [waitingForPayment, setWaitingForPayment] = useState(false);
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [musicStarted, setMusicStarted] = useState(false);
-  const [showDaily, setShowDaily] = useState(false);
-  const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [xpToast, setXpToast] = useState<string | null>(null);
   const bgMusicRef = useRef<HTMLAudioElement | null>(null);
 
@@ -205,166 +206,138 @@ export default function Home() {
           <ConnectWallet />
           <div className="flex items-center gap-2 text-xs">
             <span className="text-purple-400 font-bold">{totalXp} XP</span>
+            <button
+              type="button"
+              onClick={toggleMusic}
+              className="text-base leading-none opacity-80 hover:opacity-100"
+              aria-label="Toggle music"
+            >
+              {musicEnabled ? '🔊' : '🔇'}
+            </button>
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            <span className="text-zinc-400">LIVE</span>
           </div>
         </div>
 
-        <div className="shrink-0 text-center pt-4 pb-2 border-b border-zinc-800 px-2">
-          <h1 className="text-3xl font-bold text-white tracking-wider">MYSTIC CRATE</h1>
-          <p className="text-sm text-purple-400 mt-1">
-            {hasNftContract
-              ? `Mint NFTs · ${OPEN_CRATE_PRICE} ETH · ${mintsRemaining}/${MAX_MINTS_PER_DAY} left today`
-              : 'Connecting to Base...'}
+        <div className="shrink-0 text-center pt-3 pb-1 border-b border-zinc-800 px-2">
+          <h1 className="text-2xl font-bold text-white tracking-wider">MYSTIC CRATE</h1>
+          <p className="text-xs text-purple-400 mt-0.5">
+            {screen === 'crate' && hasNftContract
+              ? `Press S · ${OPEN_CRATE_PRICE} ETH · ${mintsRemaining}/${MAX_MINTS_PER_DAY} mints`
+              : screen === 'checkin'
+              ? 'Daily check-in rewards'
+              : screen === 'spin'
+              ? 'Spin the wheel for XP'
+              : screen === 'inventory'
+              ? 'Your NFTs · trade on OpenSea'
+              : 'Top 10 players by XP'}
           </p>
         </div>
 
         {xpToast && (
-          <div className="text-center py-1.5 text-green-400 text-xs font-medium animate-pulse">
-            {xpToast}
+          <div className="text-center py-1 text-green-400 text-xs font-medium shrink-0">{xpToast}</div>
+        )}
+
+        {(waitingForPayment || isSending || isConfirming) && screen === 'crate' && (
+          <div className="text-center py-1 text-yellow-400 text-xs shrink-0">
+            {isSending ? 'Confirm mint...' : isConfirming ? 'Minting on Base...' : 'Waiting...'}
           </div>
         )}
 
-        {(waitingForPayment || isSending || isConfirming) && (
-          <div className="text-center py-2 text-yellow-400 text-sm">
-            {isSending
-              ? 'Confirm mint in your wallet...'
-              : isConfirming
-              ? 'Minting your NFT on Base...'
-              : 'Waiting for wallet...'}
-          </div>
-        )}
-
-        <div className="shrink-0 bg-zinc-900 py-2 px-2 overflow-x-auto">
-          <div className="flex justify-center gap-1.5 min-w-min mx-auto w-max max-w-full px-1">
-            {rarities.map((r) => (
-              <div
-                key={r.name}
-                className="shrink-0 px-2 py-1 rounded-full text-[9px] leading-tight font-medium text-center whitespace-nowrap"
-                style={{ backgroundColor: r.color + '20', color: r.color }}
-              >
-                {r.name}
-                <br />
-                {r.prob}%
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex-1 min-h-0 flex items-center justify-center bg-gradient-to-b from-zinc-950 to-black p-4 relative">
-          {!revealedNFT ? (
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handlePressS}
-              className="cursor-pointer"
-            >
-              <motion.div
-                animate={isOpening ? { scale: [1, 1.15, 0.9, 1.08, 1] } : {}}
-                transition={{ duration: 1.4 }}
-                className="relative w-52 h-52 sm:w-64 sm:h-64"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500 via-pink-500 to-violet-600 rounded-full blur-3xl opacity-70" />
-                <div className="relative w-52 h-52 sm:w-64 sm:h-64 rounded-full border-8 border-white/30 bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-2xl">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-white">PRESS</div>
-                    <div className="text-7xl font-black text-white -mt-2">S</div>
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-          ) : (
-            <motion.div
-              initial={{ scale: 0.4, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: 'spring', bounce: 0.4 }}
-              className="text-center"
-            >
-              <div className="text-4xl font-bold text-purple-400 mb-1">{rarity}</div>
-              {tokenId && (
-                <p className="text-xs text-zinc-400 mb-1">Token #{tokenId} · in your wallet</p>
-              )}
-              {lastXpGain != null && lastXpGain > 0 && (
-                <p className="text-sm text-green-400 font-semibold mb-2">+{lastXpGain} XP</p>
-              )}
-              <div className="relative w-64 h-64 mx-auto">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-400 to-pink-400 blur-3xl opacity-40 rounded-3xl" />
-                <Image
-                  src={revealedNFT}
-                  alt="NFT"
-                  width={256}
-                  height={256}
-                  className="w-full h-full object-contain rounded-3xl shadow-2xl relative z-10 border-4 border-purple-400/50"
-                  unoptimized
-                />
-              </div>
-              <div className="mt-6 flex flex-col items-center gap-3">
-                {openSeaLink && (
-                  <a
-                    href={openSeaLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-8 py-3 bg-purple-600 text-white font-bold rounded-full text-sm hover:bg-purple-500 transition"
-                  >
-                    View on OpenSea
-                  </a>
-                )}
-                <button
-                  onClick={reset}
-                  className="px-12 py-4 bg-white text-black font-bold rounded-full text-lg hover:bg-zinc-200 transition"
+        {screen === 'crate' && (
+          <div className="shrink-0 bg-zinc-900 py-1.5 px-2 overflow-x-auto">
+            <div className="flex justify-center gap-1 min-w-min mx-auto">
+              {rarities.map((r) => (
+                <div
+                  key={r.name}
+                  className="shrink-0 px-1.5 py-0.5 rounded-full text-[8px] font-medium text-center"
+                  style={{ backgroundColor: r.color + '20', color: r.color }}
                 >
-                  PRESS S AGAIN
-                </button>
-              </div>
-            </motion.div>
+                  {r.name} {r.prob}%
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="flex-1 min-h-0 overflow-hidden relative bg-gradient-to-b from-zinc-950 to-black">
+          {screen === 'crate' && (
+            <div className="h-full flex items-center justify-center p-4">
+              {!revealedNFT ? (
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handlePressS}
+                  className="cursor-pointer"
+                >
+                  <motion.div
+                    animate={isOpening ? { scale: [1, 1.15, 0.9, 1.08, 1] } : {}}
+                    transition={{ duration: 1.4 }}
+                    className="relative w-48 h-48"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500 via-pink-500 to-violet-600 rounded-full blur-3xl opacity-70" />
+                    <div className="relative w-48 h-48 rounded-full border-8 border-white/30 bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-2xl">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-white">PRESS</div>
+                        <div className="text-6xl font-black text-white -mt-1">S</div>
+                      </div>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ scale: 0.4, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="text-center w-full"
+                >
+                  <div className="text-3xl font-bold text-purple-400 mb-1">{rarity}</div>
+                  {tokenId && <p className="text-xs text-zinc-400 mb-1">Token #{tokenId}</p>}
+                  {lastXpGain != null && lastXpGain > 0 && (
+                    <p className="text-sm text-green-400 font-semibold mb-2">+{lastXpGain} XP</p>
+                  )}
+                  <div className="relative w-52 h-52 mx-auto">
+                    <Image
+                      src={revealedNFT}
+                      alt="NFT"
+                      width={208}
+                      height={208}
+                      className="w-full h-full object-contain rounded-3xl border-4 border-purple-400/50"
+                      unoptimized
+                    />
+                  </div>
+                  <div className="mt-4 flex flex-col items-center gap-2">
+                    {openSeaLink && (
+                      <a
+                        href={openSeaLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-6 py-2 bg-purple-600 text-white font-bold rounded-full text-xs"
+                      >
+                        View on OpenSea
+                      </a>
+                    )}
+                    <button
+                      onClick={reset}
+                      className="px-10 py-3 bg-white text-black font-bold rounded-full text-sm"
+                    >
+                      PRESS S AGAIN
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </div>
           )}
 
-          <PhoneOverlay open={showDaily} title="Daily Rewards" onClose={() => setShowDaily(false)}>
-            <DailyPanel onXpToast={showXpToast} />
-          </PhoneOverlay>
-
-          <PhoneOverlay
-            open={showLeaderboard}
-            title="Leaderboard"
-            onClose={() => setShowLeaderboard(false)}
-          >
-            <LeaderboardPanel />
-          </PhoneOverlay>
+          {screen === 'checkin' && <CheckInPanel onXpToast={showXpToast} />}
+          {screen === 'spin' && <SpinWheelPanel onXpToast={showXpToast} />}
+          {screen === 'inventory' && <InventoryPanel />}
+          {screen === 'ranks' && (
+            <div className="h-full overflow-y-auto p-3">
+              <LeaderboardPanel />
+            </div>
+          )}
         </div>
 
-        <div className="h-20 shrink-0 bg-zinc-900 flex items-center justify-center gap-5 border-t border-zinc-700">
-          <button
-            type="button"
-            onClick={() => {
-              setShowLeaderboard(true);
-              setShowDaily(false);
-            }}
-            className="w-11 h-11 rounded-full bg-zinc-800 flex items-center justify-center text-2xl hover:bg-zinc-700 transition"
-            aria-label="Leaderboard"
-          >
-            ◀
-          </button>
-          <div className="w-11 h-11 rounded-full bg-zinc-800 flex items-center justify-center text-2xl">S</div>
-          <button
-            type="button"
-            onClick={toggleMusic}
-            className="w-11 h-11 rounded-full bg-purple-600 flex items-center justify-center text-2xl font-bold hover:bg-purple-700 transition"
-            aria-label="Toggle music"
-          >
-            {musicEnabled ? '🔊' : '🔇'}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setShowDaily(true);
-              setShowLeaderboard(false);
-            }}
-            className="w-11 h-11 rounded-full bg-purple-600 flex items-center justify-center text-2xl font-bold hover:bg-purple-700 transition"
-            aria-label="Daily rewards"
-          >
-            B
-          </button>
-        </div>
+        <QuickNav active={screen} onChange={setScreen} />
         </div>
       </div>
     </div>

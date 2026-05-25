@@ -11,14 +11,14 @@
     "iconUrl": "https://my-mystic-crate.vercel.app/icon",
     "splashImageUrl": "https://my-mystic-crate.vercel.app/splash-icon",
     "splashBackgroundColor": "#000000",
-    "subtitle": "Mystery crates on Base",
-    "description": "Pay 0.000001 ETH on Base to mint real ERC-721 NFTs. Trade on OpenSea — common to legendary pulls.",
+    "subtitle": "Crates, spin, check-in & XP",
+    "description": "Mint real NFTs on Base, daily check-in streaks, spin wheel XP, inventory & leaderboard. Press S to open crates.",
     "primaryCategory": "games",
     "tags": ["nft", "base", "gaming", "crate", "crypto"],
     "ogTitle": "Mystic Crate",
     "ogDescription": "Open mystery crates on Base for 0.000001 ETH",
     "ogImageUrl": "https://my-mystic-crate.vercel.app/opengraph-image",
-    "tagline": "Press S to open crates",
+    "tagline": "Check-in · Spin · Crate · Inventory · Ranks",
     "requiredChains": ["eip155:8453"]
   },
   "frame": {
@@ -28,14 +28,14 @@
     "iconUrl": "https://my-mystic-crate.vercel.app/icon",
     "splashImageUrl": "https://my-mystic-crate.vercel.app/splash-icon",
     "splashBackgroundColor": "#000000",
-    "subtitle": "Mystery crates on Base",
-    "description": "Pay 0.000001 ETH on Base to mint real ERC-721 NFTs. Trade on OpenSea — common to legendary pulls.",
+    "subtitle": "Crates, spin, check-in & XP",
+    "description": "Mint real NFTs on Base, daily check-in streaks, spin wheel XP, inventory & leaderboard. Press S to open crates.",
     "primaryCategory": "games",
     "tags": ["nft", "base", "gaming", "crate", "crypto"],
     "ogTitle": "Mystic Crate",
     "ogDescription": "Open mystery crates on Base for 0.000001 ETH",
     "ogImageUrl": "https://my-mystic-crate.vercel.app/opengraph-image",
-    "tagline": "Press S to open crates",
+    "tagline": "Check-in · Spin · Crate · Inventory · Ranks",
     "requiredChains": ["eip155:8453"]
   }
 }
