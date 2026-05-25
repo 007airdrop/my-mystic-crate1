@@ -87,6 +87,22 @@ export const mysticCrateAbi = [
   },
   {
     type: 'function',
+    name: 'tokenURI',
+    inputs: [{ name: 'tokenId', type: 'uint256' }],
+    outputs: [{ name: '', type: 'string' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'event',
+    name: 'Transfer',
+    inputs: [
+      { name: 'from', type: 'address', indexed: true },
+      { name: 'to', type: 'address', indexed: true },
+      { name: 'tokenId', type: 'uint256', indexed: true },
+    ],
+  },
+  {
+    type: 'function',
     name: 'OPEN_PRICE',
     inputs: [],
     outputs: [{ name: '', type: 'uint256' }],

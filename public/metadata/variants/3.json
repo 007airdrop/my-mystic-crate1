@@ -2,6 +2,7 @@
   "name": "Mystic Pebble — Mystic Crate",
   "description": "A tradeable Mystic Crate NFT minted on Base. Open crates in the Mystic Crate Farcaster mini app.",
   "image": "https://my-mystic-crate.vercel.app/nfts/common/s4.png",
+  "image_url": "https://my-mystic-crate.vercel.app/nfts/common/s4.png",
   "external_url": "https://my-mystic-crate.vercel.app",
   "attributes": [
     {

@@ -10,7 +10,7 @@ import {
   useSwitchChain,
 } from 'wagmi';
 import { base } from 'wagmi/chains';
-import { decodeEventLog, parseEther } from 'viem';
+import { parseEther } from 'viem';
 import Image from 'next/image';
 import { ConnectWallet } from '@/components/ConnectWallet';
 import { QuickNav, type AppScreen } from '@/components/QuickNav';
@@ -25,8 +25,9 @@ import {
   MAX_MINTS_PER_DAY,
 } from '@/lib/contracts';
 import { APP_URL } from '@/lib/constants';
-import { getVariantById, openSeaAssetUrl } from '@/lib/nft-variants';
+import { openSeaAssetUrl } from '@/lib/nft-variants';
 import { usePlayerStats } from '@/hooks/usePlayerStats';
+import { parseMintFromReceipt } from '@/lib/parse-mint';
 
 const rarities = [
   { name: 'COMMON', prob: 50, color: '#22C55E' },
@@ -91,41 +92,20 @@ export default function Home() {
   };
 
   const revealFromReceipt = useCallback(() => {
-    if (!receipt?.logs) return false;
+    if (!receipt) return false;
+    const mint = parseMintFromReceipt(receipt);
+    if (!mint) return false;
 
-    const contract = NFT_CONTRACT_ADDRESS.toLowerCase();
-
-    for (const log of receipt.logs) {
-      if (log.address?.toLowerCase() !== contract) continue;
-      try {
-        const decoded = decodeEventLog({
-          abi: mysticCrateAbi,
-          data: log.data,
-          topics: log.topics,
-        });
-        if (decoded.eventName !== 'CrateOpened') continue;
-
-        const variantId = Number(decoded.args.variantId);
-        const mintedTokenId = decoded.args.tokenId?.toString();
-        const xpAwarded = Number(decoded.args.xpAwarded ?? 0);
-        const variant = getVariantById(variantId);
-        if (!variant) return false;
-
-        setRarity(variant.rarity.toUpperCase());
-        setRevealedNFT(variant.imagePath);
-        setTokenId(mintedTokenId ?? null);
-        setLastXpGain(xpAwarded);
-        setIsOpening(false);
-        void refetchStats();
-        void queryClient.invalidateQueries({ queryKey: ['inventory'] });
-        new Audio('/sounds/reveal.mp3').play().catch((err) => console.warn('Sound error:', err));
-        return true;
-      } catch {
-        continue;
-      }
-    }
-    return false;
-  }, [receipt, refetchStats]);
+    setRarity(mint.rarity);
+    setRevealedNFT(mint.imagePath);
+    setTokenId(mint.tokenId);
+    setLastXpGain(mint.xpAwarded);
+    setIsOpening(false);
+    void refetchStats();
+    void queryClient.invalidateQueries({ queryKey: ['inventory'] });
+    new Audio('/sounds/reveal.mp3').play().catch((err) => console.warn('Sound error:', err));
+    return true;
+  }, [receipt, refetchStats, queryClient]);
 
   const performOpenAnimation = useCallback(() => {
     setIsOpening(true);
@@ -139,9 +119,9 @@ export default function Home() {
     const timer = setTimeout(() => {
       if (!revealFromReceipt()) {
         setIsOpening(false);
-        alert('Crate opened but could not read mint details. Check your wallet on Base.');
+        alert('Mint confirmed! Open Items tab — if image missing, refresh in a few seconds.');
       }
-    }, 1200);
+    }, 800);
 
     return () => clearTimeout(timer);
   }, [isConfirmed, waitingForPayment, revealFromReceipt]);
@@ -292,45 +272,69 @@ export default function Home() {
                 </motion.div>
               ) : (
                 <motion.div
-                  initial={{ scale: 0.4, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="text-center w-full"
+                  initial={{ scale: 0.3, opacity: 0, rotateY: 90 }}
+                  animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+                  transition={{ type: 'spring', bounce: 0.35, duration: 0.7 }}
+                  className="text-center w-full px-2"
                 >
-                  <div className="text-3xl font-bold text-purple-400 mb-1">{rarity}</div>
-                  {tokenId && <p className="text-xs text-zinc-400 mb-1">Token #{tokenId}</p>}
-                  {lastXpGain != null && lastXpGain > 0 && (
-                    <p className="text-sm text-green-400 font-semibold mb-2">+{lastXpGain} XP</p>
-                  )}
-                  <div className="relative w-52 h-52 mx-auto">
-                <Image
-                  src={revealedNFT.startsWith('/') ? revealedNFT : `${APP_URL}${revealedNFT}`}
-                  alt="NFT"
-                  width={208}
-                  height={208}
-                  className="w-full h-full object-contain rounded-3xl border-4 border-purple-400/50"
-                  unoptimized
-                  onError={(e) => {
-                    const img = e.target as HTMLImageElement;
-                    if (!img.src.includes(APP_URL) && revealedNFT.startsWith('/')) {
-                      img.src = `${APP_URL}${revealedNFT}`;
-                    }
-                  }}
-                />
+                  <p className="text-sm text-purple-300 mb-1">You pulled a Mystic NFT!</p>
+                  <div
+                    className="text-4xl font-black mb-2 tracking-wide"
+                    style={{
+                      background: 'linear-gradient(90deg, #c084fc, #f472b6, #a78bfa)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                    }}
+                  >
+                    {rarity}
                   </div>
-                  <div className="mt-4 flex flex-col items-center gap-2">
+                  {tokenId && (
+                    <p className="text-xs text-zinc-400 mb-1">Token #{tokenId} · in your wallet</p>
+                  )}
+                  {lastXpGain != null && lastXpGain > 0 && (
+                    <p className="text-sm text-green-400 font-bold mb-3">+{lastXpGain} XP</p>
+                  )}
+                  <div className="relative w-full max-w-[280px] mx-auto aspect-square">
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/60 to-pink-500/60 blur-2xl rounded-3xl" />
+                    <Image
+                      src={revealedNFT.startsWith('/') ? revealedNFT : `${APP_URL}${revealedNFT}`}
+                      alt="Your NFT"
+                      fill
+                      className="object-contain rounded-2xl border-4 border-purple-400/70 shadow-2xl relative z-10"
+                      unoptimized
+                      priority
+                      onError={(e) => {
+                        const img = e.target as HTMLImageElement;
+                        if (!img.src.includes(APP_URL) && revealedNFT.startsWith('/')) {
+                          img.src = `${APP_URL}${revealedNFT}`;
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="mt-5 flex flex-col items-center gap-2">
                     {openSeaLink && (
                       <a
                         href={openSeaLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-6 py-2 bg-purple-600 text-white font-bold rounded-full text-xs"
+                        className="px-8 py-2.5 bg-purple-600 text-white font-bold rounded-full text-sm hover:bg-purple-500"
                       >
                         View on OpenSea
                       </a>
                     )}
                     <button
+                      type="button"
+                      onClick={() => {
+                        setScreen('inventory');
+                      }}
+                      className="text-xs text-purple-300 underline"
+                    >
+                      See in Items →
+                    </button>
+                    <button
+                      type="button"
                       onClick={reset}
-                      className="px-10 py-3 bg-white text-black font-bold rounded-full text-sm"
+                      className="mt-1 px-12 py-3.5 bg-white text-black font-bold rounded-full text-base shadow-lg hover:bg-zinc-100"
                     >
                       PRESS S AGAIN
                     </button>

@@ -33,11 +33,13 @@ const outDir = path.join(root, 'public', 'metadata', 'variants');
 fs.mkdirSync(outDir, { recursive: true });
 
 for (const v of variants) {
+  const imageUrl = `${APP_URL}${v.imagePath}`;
   const json = {
     name: `${v.name} — Mystic Crate`,
     description:
       'A tradeable Mystic Crate NFT minted on Base. Open crates in the Mystic Crate Farcaster mini app.',
-    image: `${APP_URL}${v.imagePath}`,
+    image: imageUrl,
+    image_url: imageUrl,
     external_url: APP_URL,
     attributes: [
       { trait_type: 'Rarity', value: v.rarity },

@@ -55,7 +55,7 @@ export function InventoryPanel() {
           >
             <div className="relative aspect-square w-full mb-1">
               <Image
-                src={item.imagePath}
+                src={item.imagePath.startsWith('http') ? item.imagePath : item.imagePath}
                 alt={item.name}
                 fill
                 className="object-contain rounded-lg"
