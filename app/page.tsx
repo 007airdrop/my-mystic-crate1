@@ -283,7 +283,13 @@ export default function Home() {
 
         <div className="flex-1 min-h-0 overflow-hidden relative bg-gradient-to-b from-zinc-950 to-black">
           {screen === 'crate' && (
-            <div className="h-full flex items-center justify-center p-4">
+            <div
+              className={
+                revealedNFT
+                  ? 'h-full min-h-0 overflow-y-auto app-scroll flex flex-col items-center px-3 py-3 pb-2'
+                  : 'h-full flex items-center justify-center p-4'
+              }
+            >
               {!revealedNFT ? (
                 <motion.div
                   whileHover={{ scale: 1.05 }}
@@ -314,11 +320,11 @@ export default function Home() {
                   initial={{ scale: 0.3, opacity: 0, rotateY: 90 }}
                   animate={{ scale: 1, opacity: 1, rotateY: 0 }}
                   transition={{ type: 'spring', bounce: 0.35, duration: 0.7 }}
-                  className="text-center w-full px-2"
+                  className="text-center w-full max-w-[320px] mx-auto flex flex-col items-center"
                 >
-                  <p className="text-sm text-purple-300 mb-1">You pulled a Mystic NFT!</p>
+                  <p className="text-xs text-purple-300/90 mb-0.5">You pulled a Mystic NFT!</p>
                   <div
-                    className="text-4xl font-black mb-2 tracking-wide"
+                    className="text-3xl font-black mb-1 tracking-wide leading-tight"
                     style={{
                       background: 'linear-gradient(90deg, #c084fc, #f472b6, #a78bfa)',
                       WebkitBackgroundClip: 'text',
@@ -328,48 +334,50 @@ export default function Home() {
                     {rarity}
                   </div>
                   {tokenId && (
-                    <p className="text-xs text-zinc-400 mb-1">Token #{tokenId} · in your wallet</p>
+                    <p className="text-[11px] text-zinc-400">Token #{tokenId} · in your wallet</p>
                   )}
                   {lastXpGain != null && lastXpGain > 0 && (
-                    <p className="text-sm text-green-400 font-bold mb-3">+{lastXpGain} XP</p>
+                    <p className="text-xs text-green-400 font-bold mt-0.5 mb-2">+{lastXpGain} XP</p>
                   )}
-                  <div className="relative w-full max-w-[280px] mx-auto aspect-square">
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/60 to-pink-500/60 blur-2xl rounded-3xl" />
+                  <div className="relative w-full max-w-[200px] aspect-square my-2">
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/50 to-pink-500/50 blur-xl rounded-2xl" />
                     <Image
                       src={nftImageSrc(revealedNFT)}
                       alt="Your NFT"
                       fill
-                      className="object-contain rounded-2xl border-4 border-purple-400/70 shadow-2xl relative z-10"
+                      className="object-contain rounded-xl border-2 border-purple-400/60 shadow-xl relative z-10"
                       unoptimized
                       priority
                     />
                   </div>
-                  <div className="mt-5 flex flex-col items-center gap-2">
-                    {openSeaLink && (
-                      <a
-                        href={openSeaLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-8 py-2.5 bg-purple-600 text-white font-bold rounded-full text-sm hover:bg-purple-500"
+                  <div className="w-full mt-1 flex flex-col gap-2 pb-1">
+                    <div className="grid grid-cols-2 gap-2 w-full">
+                      {openSeaLink && (
+                        <a
+                          href={openSeaLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="py-2.5 rounded-xl bg-purple-600 text-white font-bold text-xs hover:bg-purple-500 text-center"
+                        >
+                          OpenSea
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setScreen('inventory')}
+                        className={`py-2.5 rounded-xl border border-purple-500/50 text-purple-200 font-bold text-xs hover:bg-purple-950/60 ${
+                          openSeaLink ? '' : 'col-span-2'
+                        }`}
                       >
-                        View on OpenSea
-                      </a>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setScreen('inventory');
-                      }}
-                      className="text-xs text-purple-300 underline"
-                    >
-                      See in Items →
-                    </button>
+                        Items
+                      </button>
+                    </div>
                     <button
                       type="button"
                       onClick={reset}
-                      className="mt-1 px-12 py-3.5 bg-white text-black font-bold rounded-full text-base shadow-lg hover:bg-zinc-100"
+                      className="w-full py-2.5 bg-white text-black font-bold rounded-xl text-sm shadow-md hover:bg-zinc-100 active:scale-[0.98] transition-transform"
                     >
-                      PRESS S AGAIN
+                      Try again · Press S
                     </button>
                   </div>
                 </motion.div>
