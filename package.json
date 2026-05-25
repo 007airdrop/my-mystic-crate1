@@ -9,7 +9,8 @@
     "lint": "eslint",
     "metadata": "node scripts/generate-metadata.mjs",
     "compile:contract": "hardhat compile",
-    "deploy:base": "hardhat run scripts/deploy.ts --network base"
+    "deploy:base": "hardhat run scripts/deploy.ts --network base",
+    "configure:uris": "hardhat run scripts/update-variant-uris.ts --network base"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.100.13",

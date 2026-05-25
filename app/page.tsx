@@ -23,6 +23,7 @@ import {
   NFT_CONTRACT_ADDRESS,
   MAX_MINTS_PER_DAY,
 } from '@/lib/contracts';
+import { APP_URL } from '@/lib/constants';
 import { getVariantById, openSeaAssetUrl } from '@/lib/nft-variants';
 import { usePlayerStats } from '@/hooks/usePlayerStats';
 
@@ -90,7 +91,10 @@ export default function Home() {
   const revealFromReceipt = useCallback(() => {
     if (!receipt?.logs) return false;
 
+    const contract = NFT_CONTRACT_ADDRESS.toLowerCase();
+
     for (const log of receipt.logs) {
+      if (log.address?.toLowerCase() !== contract) continue;
       try {
         const decoded = decodeEventLog({
           abi: mysticCrateAbi,
@@ -295,14 +299,20 @@ export default function Home() {
                     <p className="text-sm text-green-400 font-semibold mb-2">+{lastXpGain} XP</p>
                   )}
                   <div className="relative w-52 h-52 mx-auto">
-                    <Image
-                      src={revealedNFT}
-                      alt="NFT"
-                      width={208}
-                      height={208}
-                      className="w-full h-full object-contain rounded-3xl border-4 border-purple-400/50"
-                      unoptimized
-                    />
+                <Image
+                  src={revealedNFT.startsWith('/') ? revealedNFT : `${APP_URL}${revealedNFT}`}
+                  alt="NFT"
+                  width={208}
+                  height={208}
+                  className="w-full h-full object-contain rounded-3xl border-4 border-purple-400/50"
+                  unoptimized
+                  onError={(e) => {
+                    const img = e.target as HTMLImageElement;
+                    if (!img.src.includes(APP_URL) && revealedNFT.startsWith('/')) {
+                      img.src = `${APP_URL}${revealedNFT}`;
+                    }
+                  }}
+                />
                   </div>
                   <div className="mt-4 flex flex-col items-center gap-2">
                     {openSeaLink && (
