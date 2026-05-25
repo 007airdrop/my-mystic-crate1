@@ -4,7 +4,8 @@ import { Providers } from './providers'
 import { APP_URL, ASSETS } from '@/lib/constants'
 import { miniAppEmbed } from '@/lib/miniapp-embed'
 
-const description = 'Pay 0.000001 ETH on Base and open a mystery crate!'
+const description =
+  'Mint NFTs on Base, daily check-in streaks, spin wheel XP, inventory & leaderboard.'
 
 export const viewport = {
   width: 'device-width',

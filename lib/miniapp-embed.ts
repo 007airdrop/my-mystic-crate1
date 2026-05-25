@@ -9,7 +9,7 @@ export const miniAppEmbed = {
     action: {
       type: 'launch_miniapp' as const,
       name: 'Mystic Crate',
-      url: APP_URL,
+      url: `${APP_URL}?v=2`,
       splashImageUrl: ASSETS.splash,
       splashBackgroundColor: '#000000',
     },
