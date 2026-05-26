@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { Providers } from './providers'
 import { APP_URL, ASSETS } from '@/lib/constants'
-import { miniAppEmbed } from '@/lib/miniapp-embed'
 
 const description =
   'Mint NFTs on Base, daily check-in streaks, spin wheel XP, inventory & leaderboard.'
@@ -34,7 +33,7 @@ export const metadata: Metadata = {
     images: [ASSETS.opengraph],
   },
   other: {
-    'fc:miniapp': JSON.stringify(miniAppEmbed),
+    'base:app_id': '6a11a15eeb640b005facbf51',
   },
 }
 

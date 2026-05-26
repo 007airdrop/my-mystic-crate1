@@ -20,8 +20,7 @@
     "react-dom": "19.2.4",
     "viem": "^2.50.4",
     "wagmi": "^3.6.15",
-    "@farcaster/miniapp-sdk": "^0.3.0",
-    "@farcaster/miniapp-wagmi-connector": "^2.0.0"
+    "@base-org/account": "^2.5.6"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",

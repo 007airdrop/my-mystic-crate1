@@ -1,6 +1,6 @@
 import { ASSETS, APP_URL } from './constants'
 
-/** fc:miniapp meta tag payload (Farcaster embed spec) */
+/** Mini app embed metadata payload */
 export const miniAppEmbed = {
   version: '1',
   imageUrl: ASSETS.miniappCard,

@@ -1,32 +1,12 @@
 'use client'
 
-import { useEffect } from 'react'
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
-import { sdk } from '@farcaster/miniapp-sdk'
-import { farcasterConnector, injectedConnector } from '@/config/wagmi'
+import { injectedConnector } from '@/config/wagmi'
 
 export function ConnectWallet() {
   const { address, isConnected, isConnecting, isReconnecting } = useAccount()
   const { connect, isPending } = useConnect()
   const { disconnect } = useDisconnect()
-
-  useEffect(() => {
-    let cancelled = false
-
-    void (async () => {
-      try {
-        if (cancelled || isConnected || isConnecting || isPending || isReconnecting) return
-        if (!(await sdk.isInMiniApp())) return
-        connect({ connector: farcasterConnector })
-      } catch {
-        // Not in mini app host
-      }
-    })()
-
-    return () => {
-      cancelled = true
-    }
-  }, [connect, isConnected, isConnecting, isPending, isReconnecting])
 
   if (isReconnecting) return <div>Reconnecting...</div>
   if (isConnecting || isPending) return <div>Connecting...</div>

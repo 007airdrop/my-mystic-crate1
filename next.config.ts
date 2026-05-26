@@ -41,7 +41,7 @@ const nextConfig: NextConfig = {
           {
             key: 'Content-Security-Policy',
             value:
-              "frame-ancestors 'self' https://warpcast.com https://*.warpcast.com https://farcaster.xyz https://*.farcaster.xyz https://base.org https://*.base.org https://base.app https://*.base.app https://vercel.app https://*.vercel.app",
+              "frame-ancestors 'self' https://base.org https://*.base.org https://base.app https://*.base.app https://vercel.app https://*.vercel.app",
           },
         ],
       },
