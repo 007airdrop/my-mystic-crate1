@@ -175,10 +175,15 @@ export default function Home() {
       setIsOpening(false);
       const msg = writeError.message?.includes('2 mints')
         ? 'You can only mint 2 crates per day. Try again tomorrow!'
-        : writeError.message?.slice(0, 120);
-      if (msg) alert(msg);
+        : 'Mint failed — try again';
+      showXpToast(msg);
+      // keep the detailed error in the console for debugging
+      // but avoid showing potentially sensitive/raw contract data to users
+      // (e.g. vendor error strings that may include addresses)
+      // eslint-disable-next-line no-console
+      console.error('Mint error:', writeError);
     }
-  }, [writeError, waitingForPayment]);
+  }, [writeError, waitingForPayment, showXpToast]);
 
   const handlePressS = async () => {
     if (!isConnected) {

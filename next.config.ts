@@ -41,7 +41,7 @@ const nextConfig: NextConfig = {
           {
             key: 'Content-Security-Policy',
             value:
-              "frame-ancestors 'self' https://base.org https://*.base.org https://base.app https://*.base.app https://vercel.app https://*.vercel.app",
+              "script-src 'self' 'unsafe-eval' https://vercel.live https://*.vercel.live; frame-ancestors 'self' https://base.org https://*.base.org https://base.app https://*.base.app https://vercel.app https://*.vercel.app",
           },
         ],
       },
