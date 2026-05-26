@@ -71,7 +71,7 @@ export function SpinWheelPanel({ onXpToast }: SpinWheelPanelProps) {
       address: NFT_CONTRACT_ADDRESS as `0x${string}`,
       abi: mysticCrateAbi,
       functionName: 'dailySpin',
-      value: parseEther('0.000001'),
+      value: parseEther('0.000001') as any,
       chainId: base.id,
     });
   };
