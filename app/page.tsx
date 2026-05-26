@@ -121,6 +121,18 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key?.toLowerCase() === 's') {
+        e.preventDefault();
+        void handlePressS();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handlePressS]);
+
+  useEffect(() => {
     if (!hash || !isConfirmed || !waitingForPayment) return;
 
     let cancelled = false;

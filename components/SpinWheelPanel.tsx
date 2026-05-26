@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useSwitchChain, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { base } from 'wagmi/chains';
-import { decodeEventLog } from 'viem';
+import { decodeEventLog, parseEther } from 'viem';
 import { mysticCrateAbi, NFT_CONTRACT_ADDRESS } from '@/lib/contracts';
 import { usePlayerStats } from '@/hooks/usePlayerStats';
 import { SPIN_WHEEL_SEGMENTS } from '@/lib/xp-config';
@@ -71,6 +71,7 @@ export function SpinWheelPanel({ onXpToast }: SpinWheelPanelProps) {
       address: NFT_CONTRACT_ADDRESS as `0x${string}`,
       abi: mysticCrateAbi,
       functionName: 'dailySpin',
+      value: parseEther('0.000001'),
       chainId: base.id,
     });
   };
@@ -85,7 +86,7 @@ export function SpinWheelPanel({ onXpToast }: SpinWheelPanelProps) {
     <div className="w-full h-full flex flex-col items-center justify-center p-3">
       <p className="text-purple-300 font-bold text-sm mb-2">🎡 Daily Spin Wheel</p>
       <p className="text-zinc-400 text-[10px] mb-3 text-center">
-        Free once per day · Wheel shows 10–30 XP
+        0.000001 ETH once per day · Wheel shows 10–30 XP
       </p>
 
       <div className="relative w-52 h-52 mb-4">
