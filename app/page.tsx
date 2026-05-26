@@ -120,6 +120,57 @@ export default function Home() {
     new Audio('/sounds/crate-open.mp3').play().catch((err) => console.warn('Sound error:', err));
   }, []);
 
+  const handlePressS = useCallback(async () => {
+    if (!isConnected) {
+      alert('Please connect your wallet first.');
+      return;
+    }
+    if (!hasNftContract) {
+      alert('NFT contract is loading. Please try again in a moment.');
+      return;
+    }
+    if (mintsRemaining <= 0) {
+      alert(`Daily limit reached (${MAX_MINTS_PER_DAY} mints per day). Come back tomorrow!`);
+      return;
+    }
+    if (isOpening || revealedNFT || waitingForPayment || isSending || isConfirming) return;
+
+    try {
+      await switchChain({ chainId: base.id });
+    } catch {
+      alert('Please switch to Base network in your wallet and try again.');
+      return;
+    }
+
+    if (musicEnabled && !musicStarted) startMusic();
+    performOpenAnimation();
+    setWaitingForPayment(true);
+
+    writeContract({
+      address: NFT_CONTRACT_ADDRESS as `0x${string}`,
+      abi: mysticCrateAbi,
+      functionName: 'openCrate',
+      value: parseEther(OPEN_CRATE_PRICE),
+      chainId: base.id,
+    });
+  }, [
+    isConnected,
+    hasNftContract,
+    mintsRemaining,
+    isOpening,
+    revealedNFT,
+    waitingForPayment,
+    isSending,
+    isConfirming,
+    switchChain,
+    musicEnabled,
+    musicStarted,
+    startMusic,
+    performOpenAnimation,
+    setWaitingForPayment,
+    writeContract,
+  ]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key?.toLowerCase() === 's') {
@@ -127,7 +178,7 @@ export default function Home() {
         void handlePressS();
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handlePressS]);
@@ -185,40 +236,6 @@ export default function Home() {
     }
   }, [writeError, waitingForPayment, showXpToast]);
 
-  const handlePressS = async () => {
-    if (!isConnected) {
-      alert('Please connect your wallet first.');
-      return;
-    }
-    if (!hasNftContract) {
-      alert('NFT contract is loading. Please try again in a moment.');
-      return;
-    }
-    if (mintsRemaining <= 0) {
-      alert(`Daily limit reached (${MAX_MINTS_PER_DAY} mints per day). Come back tomorrow!`);
-      return;
-    }
-    if (isOpening || revealedNFT || waitingForPayment || isSending || isConfirming) return;
-
-    try {
-      await switchChain({ chainId: base.id });
-    } catch {
-      alert('Please switch to Base network in your wallet and try again.');
-      return;
-    }
-
-    if (musicEnabled && !musicStarted) startMusic();
-    performOpenAnimation();
-    setWaitingForPayment(true);
-
-    writeContract({
-      address: NFT_CONTRACT_ADDRESS as `0x${string}`,
-      abi: mysticCrateAbi,
-      functionName: 'openCrate',
-      value: parseEther(OPEN_CRATE_PRICE),
-      chainId: base.id,
-    });
-  };
 
   const reset = () => {
     setRevealedNFT(null);
